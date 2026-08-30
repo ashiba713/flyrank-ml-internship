@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Decline Risk — FlyRank Capstone</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2d;
+      --panel2: #18223a;
+      --text: #eef2ff;
+      --muted: #aab5cf;
+      --accent: #8b9cff;
+      --border: #293653;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 1050px; margin: auto; padding: 48px 22px 70px; }
+    .hero {
+      padding: 38px;
+      background: linear-gradient(135deg, var(--panel), #10172a);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+    }
+    h1 { font-size: 2.35rem; line-height: 1.15; margin: 0 0 12px; }
+    h2 { margin-top: 0; font-size: 1.45rem; }
+    h3 { margin-bottom: 8px; }
+    .subtitle { color: var(--muted); max-width: 800px; }
+    .badge {
+      display: inline-block;
+      padding: 5px 11px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: .82rem;
+      margin-bottom: 16px;
+    }
+    section {
+      margin-top: 24px;
+      padding: 28px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .metric { font-size: 1.7rem; font-weight: 750; }
+    .label { color: var(--muted); font-size: .9rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    th { color: var(--muted); }
+    code {
+      background: #0a0f1d;
+      padding: 2px 6px;
+      border-radius: 5px;
+    }
+    ul { padding-left: 22px; }
+    .note {
+      border-left: 3px solid var(--accent);
+      padding-left: 15px;
+      color: var(--muted);
+    }
+    footer {
+      color: var(--muted);
+      text-align: center;
+      margin-top: 35px;
+      font-size: .9rem;
+    }
+    @media (max-width: 650px) {
+      .hero, section { padding: 22px; }
+      h1 { font-size: 1.85rem; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="badge">FLYRANK · MACHINE LEARNING CAPSTONE</div>
+    <h1>Predicting Future Content Impression Decline</h1>
+    <p class="subtitle">
+      A leakage-safe, client-grouped machine-learning experiment using anonymized
+      content-performance data. The goal is decision support: identifying whether
+      historical signals contain useful information about a future ≥20% decline in impressions.
+    </p>
+  </header>
+
+  <section>
+    <h2>1. Research question</h2>
+    <p>
+      Can historical content-performance signals help distinguish content items
+      that will experience a substantial future decline in impressions?
+    </p>
+    <p class="note">
+      Decision supported: prioritize content items for further review based on
+      measured historical signals. This experiment does not claim to predict
+      Google's ranking algorithm or establish causal relationships.
+    </p>
+  </section>
+
+  <section>
+    <h2>2. Data</h2>
+    <div class="grid">
+      <div class="card"><div class="metric">111,247</div><div class="label">rows with future outcomes</div></div>
+      <div class="card"><div class="metric">101,620</div><div class="label">rows available in the earlier modeling pass</div></div>
+      <div class="card"><div class="metric">2026-06-30</div><div class="label">warehouse end date</div></div>
+      <div class="card"><div class="metric">64.35%</div><div class="label">future-decline rate</div></div>
+    </div>
+
+    <p>
+      The experiment used anonymized client and content identifiers and historical
+      performance windows. Query-level features were inspected separately, but the
+      final leakage-safe model used only the three historical performance features
+      that were successfully constructed for the final experiment.
+    </p>
+  </section>
+
+  <section>
+    <h2>3. Methodology</h2>
+    <h3>Target definition</h3>
+    <p>
+      <code>future_declined = 1</code> when future impressions fell by at least
+      20% relative to the baseline period; otherwise <code>0</code>.
+    </p>
+
+    <h3>Final features</h3>
+    <ul>
+      <li><code>impressions_feature_30d</code></li>
+      <li><code>clicks_feature_30d</code></li>
+      <li><code>avg_position_feature_30d</code></li>
+    </ul>
+
+    <h3>Validation</h3>
+    <p>
+      The final experiment used a grouped train/test split by
+      <code>client_hash_id</code>, keeping clients completely separate between
+      training and testing.
+    </p>
+    <div class="grid">
+      <div class="card"><div class="metric">97,494</div><div class="label">training rows</div></div>
+      <div class="card"><div class="metric">13,753</div><div class="label">testing rows</div></div>
+      <div class="card"><div class="metric">40 / 10</div><div class="label">training / testing clients</div></div>
+      <div class="card"><div class="metric">0</div><div class="label">client overlap</div></div>
+    </div>
+
+    <p>
+      A Random Forest classifier was compared with a majority-class baseline that
+      always predicts <code>declined</code>. Historical features were used rather
+      than variables constructed from the future outcome window.
+    </p>
+  </section>
+
+  <section>
+    <h2>4. Results vs baseline</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Accuracy</th>
+          <th>ROC-AUC</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Always predict declined (baseline)</td>
+          <td>64.35%</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Leakage-safe Random Forest</td>
+          <td>60.52%</td>
+          <td>0.5799</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      The Random Forest did not outperform the majority-class baseline on accuracy.
+      Its ROC-AUC of 0.5799 indicates limited ability to distinguish future declines
+      from non-declines using the three historical features in this experiment.
+    </p>
+
+    <h3>Confusion matrix</h3>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Predicted: Not declined</th>
+          <th>Predicted: Declined</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>True: Not declined</th>
+          <td>1,713</td>
+          <td>3,045</td>
+        </tr>
+        <tr>
+          <th>True: Declined</th>
+          <td>2,384</td>
+          <td>6,611</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Feature importance</h2>
+    <table>
+      <thead>
+        <tr><th>Feature</th><th>Importance</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>avg_position_feature_30d</code></td><td>0.552932</td></tr>
+        <tr><td><code>impressions_feature_30d</code></td><td>0.379523</td></tr>
+        <tr><td><code>clicks_feature_30d</code></td><td>0.067546</td></tr>
+      </tbody>
+    </table>
+    <p class="note">
+      Feature importance is an association within this model, not evidence that a
+      feature causes future decline.
+    </p>
+  </section>
+
+  <section>
+    <h2>5. Limitations</h2>
+    <ul>
+      <li>The model did not beat the majority-class baseline on accuracy.</li>
+      <li>The ROC-AUC indicates only limited predictive separation in this experiment.</li>
+      <li>Only three historical features were used in the final model.</li>
+      <li>Results are based on the available anonymized warehouse release and its time windows.</li>
+      <li>The experiment does not establish causation.</li>
+      <li>It does not claim to reproduce or predict Google's ranking algorithm.</li>
+      <li>Performance on these anonymized clients should not automatically be generalized to other datasets.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>6. Ranked recommendations</h2>
+    <ol>
+      <li>
+        <strong>Use the model as an exploratory decision-support signal, not as an
+        automated decision maker.</strong>
+      </li>
+      <li>
+        <strong>Investigate average-position changes first.</strong>
+        It had the highest model feature importance in this experiment.
+      </li>
+      <li>
+        <strong>Combine impression history with position context</strong> when
+        reviewing potentially declining content.
+      </li>
+      <li>
+        <strong>Collect and test additional historical signals</strong> before
+        treating the approach as production-ready.
+      </li>
+      <li>
+        <strong>Keep client-grouped validation</strong> in future experiments to
+        reduce the risk of client leakage.
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>7. Artifacts</h2>
+    <p>
+      The deployed research page is accompanied by the capstone notebook containing
+      the data preparation, leakage checks, grouped validation, model evaluation,
+      confusion matrix, and feature-importance analysis.
+    </p>
+    <p class="note">
+      All identifiers shown here are anonymized. No client names, private URLs, or
+      private search queries are included.
+    </p>
+  </section>
+
+  <footer>
+    FlyRank Machine Learning Capstone · Evidence-first · Leakage-safe evaluation
+  </footer>
+
+</div>
+</body>
+</html>
